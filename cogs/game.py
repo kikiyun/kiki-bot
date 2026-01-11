@@ -70,42 +70,49 @@ class Game2048:
         original_grid = copy.deepcopy(self.grid)
         moved = False
 
-        if direction == \'left\':
-            for r in range(4):\
+        if direction == 'left':
+            for r in range(4):
                 new_row = self._slide_and_merge_line(self.grid[r])
                 if new_row != self.grid[r]:
                     self.grid[r] = new_row
                     moved = True
         
-        elif direction == \'right\':
-            for r in range(4):\
+        elif direction == 'right':
+            for r in range(4):
                 reversed_row = self.grid[r][::-1]
                 new_row = self._slide_and_merge_line(reversed_row)
                 if new_row[::-1] != self.grid[r]: # Compare with original row after reversing
                     self.grid[r] = new_row[::-1]
                     moved = True
 
-        elif direction == \'up\':
+        elif direction == 'up':
             transposed_grid = self.transpose(self.grid)
-            for c in range(4):\
+            for c in range(4):
                 column = [transposed_grid[r][c] for r in range(4)]
                 new_column = self._slide_and_merge_line(column)
                 if new_column != column:
                     for r in range(4):
                         transposed_grid[r][c] = new_column[r]
                     moved = True
-            self.grid = self.transpose(transposed_grid)
+            if self.transpose(transposed_grid) != self.grid:
+                self.grid = self.transpose(transposed_grid)
+                moved = True
 
-        elif direction == \'down\':
+
+        elif direction == 'down':
             transposed_grid = self.transpose(self.grid)
-            for c in range(4):\
+            for c in range(4):
                 column = [transposed_grid[r][c] for r in range(4)][::-1] # Reverse for down
                 new_column = self._slide_and_merge_line(column)
-                if new_column[::-1] != [transposed_grid[r][c] for r in range(4)]: # Compare with original column
+                original_column = [transposed_grid[r][c] for r in range(4)]
+                if new_column[::-1] != original_column: # Compare with original column
                     for r in range(4):
                         transposed_grid[r][c] = new_column[::-1][r] # Reverse back to assign
                     moved = True
-            self.grid = self.transpose(transposed_grid)
+
+            if self.transpose(transposed_grid) != self.grid:
+                self.grid = self.transpose(transposed_grid)
+                moved = True
 
         if moved:
             self.add_new_tile()
