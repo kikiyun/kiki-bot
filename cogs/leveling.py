@@ -113,6 +113,14 @@ class Leveling(commands.Cog):
             embed.add_field(name="💖 等級", value=f"**{level}**", inline=True)
             embed.add_field(name="🌟 經驗值", value=f"**{exp}/{exp_to_next_level}**", inline=True)
             embed.add_field(name="🏆 排行榜名次", value=f"**#{rank_position}**", inline=True)
+            
+            # Progress bar calculation
+            progress = exp / exp_to_next_level
+            filled_hearts = int(progress * 10)
+            empty_hearts = 10 - filled_hearts
+            progress_bar = "❤️" * filled_hearts + "🤍" * empty_hearts
+            embed.add_field(name="進度", value=progress_bar, inline=False)
+            
             embed.set_footer(text="繼續加油喔！(๑•̀ㅂ•́)و✧")
             await interaction.response.send_message(embed=embed)
         else:
