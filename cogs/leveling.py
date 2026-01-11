@@ -110,6 +110,7 @@ class Leveling(commands.Cog):
                 title=f"✨ {interaction.user.display_name} 的等級資料 ✨",
                 color=discord.Color.fuchsia()
             )
+            embed.set_thumbnail(url=interaction.user.avatar.url)
             embed.add_field(name="💖 等級", value=f"**{level}**", inline=True)
             embed.add_field(name="🌟 經驗值", value=f"**{exp}/{exp_to_next_level}**", inline=True)
             embed.add_field(name="🏆 排行榜名次", value=f"**#{rank_position}**", inline=True)
@@ -133,6 +134,7 @@ class Leveling(commands.Cog):
         total_pages = (len(sorted_users) + 9) // 10
         
         embed = await create_leaderboard_embed(1, self.bot, users)
+        embed.set_thumbnail(url=self.bot.user.avatar.url)
         view = LeaderboardView(self.bot, total_pages, initial_page=1)
         
         await interaction.response.send_message(embed=embed, view=view)
