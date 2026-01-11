@@ -88,31 +88,23 @@ class Game2048:
         elif direction == 'up':
             transposed_grid = self.transpose(self.grid)
             for c in range(4):
-                column = [transposed_grid[r][c] for r in range(4)]
-                new_column = self._slide_and_merge_line(column)
-                if new_column != column:
-                    for r in range(4):
-                        transposed_grid[r][c] = new_column[r]
+                new_column = self._slide_and_merge_line(transposed_grid[c])
+                if new_column != transposed_grid[c]:
+                    transposed_grid[c] = new_column
                     moved = True
-            if self.transpose(transposed_grid) != self.grid:
+            if moved:
                 self.grid = self.transpose(transposed_grid)
-                moved = True
-
 
         elif direction == 'down':
             transposed_grid = self.transpose(self.grid)
             for c in range(4):
-                column = [transposed_grid[r][c] for r in range(4)][::-1] # Reverse for down
-                new_column = self._slide_and_merge_line(column)
-                original_column = [transposed_grid[r][c] for r in range(4)]
-                if new_column[::-1] != original_column: # Compare with original column
-                    for r in range(4):
-                        transposed_grid[r][c] = new_column[::-1][r] # Reverse back to assign
+                reversed_column = transposed_grid[c][::-1]
+                new_column = self._slide_and_merge_line(reversed_column)
+                if new_column[::-1] != transposed_grid[c]:
+                    transposed_grid[c] = new_column[::-1]
                     moved = True
-
-            if self.transpose(transposed_grid) != self.grid:
+            if moved:
                 self.grid = self.transpose(transposed_grid)
-                moved = True
 
         if moved:
             self.add_new_tile()
@@ -152,7 +144,6 @@ class GameView(ui.View):
 
         if self.game.game_over:
             title = "💔 遊戲結束 💔"
-            # Keep the color consistent as per the user's request for all embeds
             color = discord.Color.from_rgb(255, 170, 213)
 
         embed = discord.Embed(title=title, description=f"**分數: {self.game.score}**\n\n{board}", color=color)
@@ -168,10 +159,20 @@ class GameView(ui.View):
         embed = self.create_embed()
         await interaction.response.edit_message(embed=embed, view=self)
 
+    # Invisible spacer button
+    @ui.button(label="\u200b", style=discord.ButtonStyle.secondary, disabled=True, row=0)
+    async def spacer_1(self, interaction: discord.Interaction, button: ui.Button):
+        pass
+
     @ui.button(label="⬆️", style=discord.ButtonStyle.primary, row=0)
     async def up_button(self, interaction: discord.Interaction, button: ui.Button):
         self.game.move('up')
         await self.update_message(interaction)
+
+    # Invisible spacer button
+    @ui.button(label="\u200b", style=discord.ButtonStyle.secondary, disabled=True, row=0)
+    async def spacer_2(self, interaction: discord.Interaction, button: ui.Button):
+        pass
 
     @ui.button(label="⬅️", style=discord.ButtonStyle.primary, row=1)
     async def left_button(self, interaction: discord.Interaction, button: ui.Button):
