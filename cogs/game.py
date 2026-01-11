@@ -37,6 +37,25 @@ class Game2048:
         self.add_new_tile()
         self.add_new_tile()
 
+    def _slide_and_merge_line(self, line):
+        # Move all non-zero numbers to one side
+        new_line = [i for i in line if i != 0]
+        # Fill with zeros
+        new_line += [0] * (4 - len(new_line))
+
+        # Merge adjacent identical numbers
+        for i in range(3):
+            if new_line[i] != 0 and new_line[i] == new_line[i+1]:
+                new_line[i] *= 2
+                self.score += new_line[i]
+                new_line[i+1] = 0
+        
+        # Move non-zero numbers again after merging
+        new_line = [i for i in new_line if i != 0]
+        # Fill with zeros
+        new_line += [0] * (4 - len(new_line))
+        return new_line
+
     def get_empty_cells(self):
         return [(r, c) for r in range(4) for c in range(4) if self.grid[r][c] == 0]
 
@@ -47,43 +66,48 @@ class Game2048:
         r, c = random.choice(empty_cells)
         self.grid[r][c] = 2 if random.random() < 0.9 else 4
 
-    def compress(self, row):
-        new_row = [i for i in row if i != 0]
-        new_row += [0] * (4 - len(new_row))
-        return new_row
-
-    def merge(self, row):
-        for i in range(3):
-            if row[i] != 0 and row[i] == row[i+1]:
-                row[i] *= 2
-                self.score += row[i]
-                row[i+1] = 0
-        return row
-
     def move(self, direction):
         original_grid = copy.deepcopy(self.grid)
+        moved = False
+
+        if direction == \'left\':
+            for r in range(4):\
+                new_row = self._slide_and_merge_line(self.grid[r])
+                if new_row != self.grid[r]:
+                    self.grid[r] = new_row
+                    moved = True
         
-        if direction == 'left':
-            for r in range(4):
-                self.grid[r] = self.compress(self.merge(self.compress(self.grid[r])))
-        
-        elif direction == 'right':
-            for r in range(4):
+        elif direction == \'right\':
+            for r in range(4):\
                 reversed_row = self.grid[r][::-1]
-                processed_row = self.compress(self.merge(self.compress(reversed_row)))
-                self.grid[r] = processed_row[::-1]
+                new_row = self._slide_and_merge_line(reversed_row)
+                if new_row[::-1] != self.grid[r]: # Compare with original row after reversing
+                    self.grid[r] = new_row[::-1]
+                    moved = True
 
-        elif direction == 'up':
-            self.grid = self.transpose(self.grid)
-            self.move('left')
-            self.grid = self.transpose(self.grid)
+        elif direction == \'up\':
+            transposed_grid = self.transpose(self.grid)
+            for c in range(4):\
+                column = [transposed_grid[r][c] for r in range(4)]
+                new_column = self._slide_and_merge_line(column)
+                if new_column != column:
+                    for r in range(4):
+                        transposed_grid[r][c] = new_column[r]
+                    moved = True
+            self.grid = self.transpose(transposed_grid)
 
-        elif direction == 'down':
-            self.grid = self.transpose(self.grid)
-            self.move('right')
-            self.grid = self.transpose(self.grid)
+        elif direction == \'down\':
+            transposed_grid = self.transpose(self.grid)
+            for c in range(4):\
+                column = [transposed_grid[r][c] for r in range(4)][::-1] # Reverse for down
+                new_column = self._slide_and_merge_line(column)
+                if new_column[::-1] != [transposed_grid[r][c] for r in range(4)]: # Compare with original column
+                    for r in range(4):
+                        transposed_grid[r][c] = new_column[::-1][r] # Reverse back to assign
+                    moved = True
+            self.grid = self.transpose(transposed_grid)
 
-        if self.grid != original_grid:
+        if moved:
             self.add_new_tile()
             self.check_game_over()
             return True
@@ -117,11 +141,12 @@ class GameView(ui.View):
         board = "\n".join(" ".join(TILE_EMOJIS.get(cell, "❓") for cell in row) for row in self.game.grid)
         
         title = "💖 2048 小遊戲 💖"
-        color = discord.Color.fuchsia()
+        color = discord.Color.from_rgb(255, 170, 213)
 
         if self.game.game_over:
             title = "💔 遊戲結束 💔"
-            color = discord.Color.dark_grey()
+            # Keep the color consistent as per the user's request for all embeds
+            color = discord.Color.from_rgb(255, 170, 213)
 
         embed = discord.Embed(title=title, description=f"**分數: {self.game.score}**\n\n{board}", color=color)
         embed.add_field(name="TILE KEY", value=EMOJI_LEGEND, inline=False)

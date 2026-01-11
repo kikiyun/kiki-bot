@@ -20,7 +20,7 @@ async def create_leaderboard_embed(page: int, bot: commands.Bot, users):
     start_index = (page - 1) * 10
     end_index = start_index + 10
     
-    embed = discord.Embed(title="💖 等級排行榜 💖", color=discord.Color.fuchsia())
+    embed = discord.Embed(title="💖 等級排行榜 💖", color=discord.Color.from_rgb(255, 170, 213))
     
     if start_index >= len(sorted_users):
         embed.description = "這一頁沒有資料呢！(｡>﹏<｡)"
@@ -108,7 +108,7 @@ class Leveling(commands.Cog):
 
             embed = discord.Embed(
                 title=f"✨ {interaction.user.display_name} 的等級資料 ✨",
-                color=discord.Color.fuchsia()
+                color=discord.Color.from_rgb(255, 170, 213)
             )
             embed.set_thumbnail(url=interaction.user.avatar.url)
             embed.add_field(name="💖 等級", value=f"**{level}**", inline=True)
