@@ -1,3 +1,4 @@
+import random
 from discord import app_commands
 from discord.ext import commands
 
@@ -7,7 +8,14 @@ class Basic(commands.Cog):
 
     @app_commands.command(name="hello", description="打聲招呼！")
     async def hello(self, interaction):
-        await interaction.response.send_message(f"你好，{interaction.user.mention}！")
+        greetings = [
+            f"你好，{interaction.user.mention}！",
+            f"嗨，{interaction.user.mention}！很高興見到你！",
+            f"哈囉，{interaction.user.mention}！今天過得如何？",
+            f"安安，{interaction.user.mention}！",
+            f"Yo，{interaction.user.mention}！"
+        ]
+        await interaction.response.send_message(random.choice(greetings))
 
     @app_commands.command(name="echo", description="重複你說的話")
     @app_commands.describe(message="要重複的話")
